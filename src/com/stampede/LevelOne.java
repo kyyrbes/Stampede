@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 
+// Hello there faggot.
 public class LevelOne implements Screen {
 private StampedeGame game;
 public LevelOne(StampedeGame game){
