@@ -1,157 +1,114 @@
 package com.stampede;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.Preferences;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.input.GestureDetector.GestureListener;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.Screen;
 
+public class GameOverScreen implements Screen, GestureListener {
+    /** Reference back to the game object. */
+    private StampedeGame game;
+    /** Font to use for rendering text. */
+    private BitmapFont textFont;
+    /** Sprite for the game over text. */
+    private Sprite gameOverSprite;
+    /** Sprite for the try again text, */
+    private Sprite tryAgainSprite;
 
-public class GameOverScreen implements Screen, GestureListener{
-	private Sprite game_over, try_again;
-	private StampedeGame game;
-	Preferences prefs;
-	private int hs;
-	public GameOverScreen(StampedeGame game){
-		this.setGame(game);
-		prefs = Gdx.app.getPreferences("Preferences");
-		
-		
-	}
-		@Override
-	public void render(float delta) {
-			System.out.print("Rendering has begun!");
-			Gdx.gl.glClearColor(1, 1, 1, 1);
-			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-			game.batch.setProjectionMatrix(game.camera.combined);
-			game.batch.begin();
-			game.batch.draw(game_over, 0, 0);
-			game.batch.draw(try_again, Gdx.graphics.getWidth()/2-try_again.getWidth()/2, Gdx.graphics.getHeight()*.6f);
-			game.bitmap_font.setColor(1, 1, 1, 1);
-			game.bitmap_font.draw(game.batch,"SCORE: "+Integer.toString(game.score)+"\n HIGH: "+prefs.getInteger("highscore",0), Gdx.graphics.getWidth()/2.37f, Gdx.graphics.getHeight()-200);
-		    game.batch.end();
-				
-		    }
-	
+    public GameOverScreen(StampedeGame game) {
+        this.game = game;
+        textFont = new BitmapFont(true);
+        textFont.setColor(1, 1, 1, 1);
 
-	@Override
-	public void resize(int width, int height) {
-		// TODO Auto-generated method stub
-		
-	}
+        // Create the sprites.
+		TextureRegion gameOverRegion = new TextureRegion(game.getResources().backgroundSpriteTexture, 2, 724, 1280, 720);
+		gameOverSprite = new Sprite(gameOverRegion);
+		TextureRegion tryAgainRegion = new TextureRegion(game.getResources().spriteTexture, 84, 2, 136, 34);
+		tryAgainSprite = new Sprite(tryAgainRegion);
+		tryAgainSprite.setOrigin(Gdx.graphics.getWidth() / 2 - tryAgainRegion.getRegionWidth() / 2, Gdx.graphics.getHeight() * 0.6f);
+    }
+
+    @Override
+    public void render(float delta) {
+        // Draw the sprites.
+        SpriteBatch spriteBatch = game.getResources().spriteBatch;
+        spriteBatch.begin();
+        spriteBatch.draw(
+            gameOverSprite,
+            0, 0,
+            Gdx.graphics.getWidth(),
+            Gdx.graphics.getHeight());
+        spriteBatch.draw(
+            tryAgainSprite,
+            Gdx.graphics.getWidth() / 2 - tryAgainSprite.getWidth() / 2,
+            Gdx.graphics.getHeight() * 0.6f);
+        textFont.draw(
+            spriteBatch,
+            "SCORE: " + Integer.toString(game.getState().score) +
+                "\n HIGH: 0" /*+ prefs.getInteger("highscore", 0)*/,
+            Gdx.graphics.getWidth() / 2.37f, Gdx.graphics.getHeight() - 200);
+        spriteBatch.end();
+    }
 
 	@Override
 	public void show() {
-		//Texture gameover = new Texture(Gdx.files.internal("data/gameover.png"));
-		//gameover.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+        // Set this screen up to handle user input.
 		InputMultiplexer im = new InputMultiplexer();
-		GestureDetector gd = new GestureDetector(this);
-		im.addProcessor(gd);
+	    GestureDetector detector = new GestureDetector(this);
+	    im.addProcessor(detector);
 		Gdx.input.setInputProcessor(im);
-		
-		
-		if (game.score>prefs.getInteger("highscore", 0)){
-			prefs.putInteger("highscore", game.score);
-			prefs.flush();
-			
-		game.message = Integer.toString(prefs.getInteger("highscore"));
-		Gdx.app.log("MyLibGDXGame", game.message);
-		}
-			
-		TextureRegion gameover = new TextureRegion(game.background,2,724,1280,720);
-		TextureRegion tryagain = new TextureRegion(game.sprites,84,2,136,34);
-		try_again = new Sprite(tryagain);
-		
-		try_again.setOrigin(Gdx.graphics.getWidth()/2-try_again.getRegionWidth()/2, Gdx.graphics.getHeight()*.6f);
-		game_over = new Sprite(gameover);
-		
+
+        // Render the screen.
 		render(0);
-		
 	}
 
-	@Override
-	public void hide() {
-		// TODO Auto-generated method stub
-		//gameover.dispose();
-		//tryagain.dispose();
-	}
-
-	@Override
-	public void pause() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void resume() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void dispose() {
-		// TODO Auto-generated method stub
-		
-	}
-	public StampedeGame getGame() {
-		return game;
-	}
-	public void setGame(StampedeGame game) {
-		this.game = game;
-	}
-	@Override
+    @Override
 	public boolean touchDown(float x, float y, int pointer, int button) {
-		if ((x>=560) &&(y>=410)&&((x<=760) &&(y<=500))){
-			game.message = ("Touch down! coord: "+x+", "+y);
-			 // System.out.print(message);
-			Gdx.app.log("MyLibGDXGame", game.message);
-	    	
-	    	game.resetGame();
-		}
-		return true;
-	}
+        game.levelOne.reset();
+        game.setScreen(game.levelOne);
+
+        return true;
+    }
+
+    // Unused methods.
 	@Override
-	public boolean tap(float x, float y, int count, int button) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	public void hide() {}
+
 	@Override
-	public boolean longPress(float x, float y) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	public void pause() {}
+
 	@Override
-	public boolean fling(float velocityX, float velocityY, int button) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	public void resume() {}
+
 	@Override
-	public boolean pan(float x, float y, float deltaX, float deltaY) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	public void dispose() {}
+
 	@Override
-	public boolean panStop(float x, float y, int pointer, int button) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	public void resize(int width, int height) {}
+
 	@Override
-	public boolean zoom(float initialDistance, float distance) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	public boolean longPress(float x, float y) { return false; }
+
+	@Override
+	public boolean fling(float velocityX, float velocityY, int button) { return false; }
+
+	@Override
+	public boolean pan(float x, float y, float deltaX, float deltaY) { return false; }
+
+	@Override
+	public boolean panStop(float x, float y, int pointer, int button) { return false; }
+
+	@Override
+	public boolean zoom(float initialDistance, float distance) { return false; }
+
 	@Override
 	public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2,
-			Vector2 pointer1, Vector2 pointer2) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+        Vector2 pointer1, Vector2 pointer2) { return false; }
 
+	@Override
+	public boolean tap(float x, float y, int count, int button) { return false; }
 }
